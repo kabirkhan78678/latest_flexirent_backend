@@ -188,7 +188,9 @@ export const getAllProperty = async (req, res) => {
         let house_rules = item.house_rules ? item.house_rules.split(',') : [];
 
         let [total_bookings] = await getPropertyBookingsCount(item.property_id);
-        item.total_bookings = total_bookings?.total_booking || 0;
+        item.property_booked_count = total_bookings?.total_booking || 0;
+        delete item.total_bookings;
+        delete item.bookings;
 
         if (Array.isArray(amenities) && amenities.length > 0) {
           item.amenities_label = await getPropertyAmenitits(amenities);
