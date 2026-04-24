@@ -2834,6 +2834,18 @@ export const getRecentBooking = async (req, res) => {
           : "";
         item.host_image = item?.host_image ? `${process.env.BASE_URL}profile/${item?.host_image}`
           : "";
+        const offer = await getActiveOfferByPropertyId(item.property_id);
+        if (offer) {
+          item.offer_value = offer.offer_value;
+          item.offer_type = offer.offer_type;
+          item.offer_start_date = offer.start_date;
+          item.offer_end_date = offer.end_date;
+        } else {
+          item.offer_value = item.offer_value ?? null;
+          item.offer_type = item.offer_type ?? null;
+          item.offer_start_date = item.offer_start_date ?? null;
+          item.offer_end_date = item.offer_end_date ?? null;
+        }
         let amenities = item.amenities ? item.amenities.split(',') : [];
         let safety_amenities = item.safety_amenities ? item.safety_amenities.split(',') : [];
         let ideal_for = item.ideal_for ? item.ideal_for.split(',') : [];

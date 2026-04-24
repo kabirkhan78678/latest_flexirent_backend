@@ -137,7 +137,7 @@ export const getHostDocumentByIdModel = async (user_id, user_type) => {
 }
 
 export const getGuestBusinessDocument = async () => {
-    return db.query('SELECT d.*,u.first_name,u.last_name,u.email,u.phone,u.profile_image,CASE d.status WHEN 0 THEN "Pending" WHEN 1 THEN "Approved" WHEN 2 THEN "Rejected" END AS status_label  FROM document_master d JOIN users u ON u.id = d.id WHERE d.user_type = 1 AND u.user_type = 2 ORDER BY d.created_at DESC', []);
+    return db.query('SELECT d.*,u.first_name,u.last_name,u.email,u.phone,u.profile_image,CASE d.status WHEN 0 THEN "Pending" WHEN 1 THEN "Approved" WHEN 2 THEN "Rejected" END AS status_label  FROM document_master d JOIN users u ON u.id = d.id WHERE d.user_type = 2 AND u.user_type = 2 ORDER BY d.created_at DESC', []);
 }
 
 export const getHostDocument = async (user_id) => {
@@ -467,9 +467,10 @@ export const getSeoSettings = async () => {
 export const upsertSeoSettings = async (data, id = null) => {
     const columns = Object.keys(data);
     const values = Object.values(data);
+    const escapedColumns = columns.map((column) => `\`${column}\``);
 
     if (id) {
-        const setClause = columns.map((column) => `"${column}" = ?`).join(", ");
+        const setClause = escapedColumns.map((column) => `${column} = ?`).join(", ");
         return db.query(
             `UPDATE seo_management SET ${setClause} WHERE id = ?`,
             [...values, id]
@@ -477,9 +478,8 @@ export const upsertSeoSettings = async (data, id = null) => {
     }
 
     const placeholders = columns.map(() => "?").join(", ");
-    const quotedColumns = columns.map((column) => `"${column}"`).join(", ");
     return db.query(
-        `INSERT INTO seo_management (${quotedColumns}) VALUES (${placeholders})`,
+        `INSERT INTO seo_management (${escapedColumns.join(", ")}) VALUES (${placeholders})`,
         values
     );
 };
