@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>FlexsiRent - Payment Confirmation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<style type="text/css">
+  * {
+    font-family: "Poppins", sans-serif;
+  }
+</style>
+
+<body>
+  <div style="min-height: 100vh; overflow-y: auto; display: flex;">
+    <table style="max-width: 600px; width: 100%; border-radius: 10px; background-color: #fff; border-collapse: collapse; margin: auto;">
+      <tr style="background-color: #f5f5f5;">
+        <td style="padding: 15px;">
+          <h2 style="margin: 0; text-align: center;">
+            <img src="http://3.75.55.216:4000/logo.png"
+              style="width:120px; display: block; margin: auto;" alt="FlexsiRent Logo">
+          </h2>
+        </td>
+      </tr>
+      <tr style="background-color:#fff; box-shadow: 4px 16px 25px rgba(0, 0, 0, 0.12);">
+        <td style="padding: 50px 30px 30px;">
+          <h3 style="text-align: center; color: #001649;">Confirm Your Booking Payment</h3>
+          <p style="text-align: center;">{{msg}}</p>
+          <div style="text-align: center; margin-top: 40px;">
+            <a href="{{href_url}}" target="_blank"
+              style="background-color: #001649; padding: 12px 20px; border-radius: 5px; border: none; color: #fff; text-decoration: none;">Pay Now</a>
+          </div>
+          <div style="padding-top: 50px;">
+            <h4 style="margin-bottom: 10px;">Cheers,</h4>
+            <p style="margin: 0;">FlexsiRent Team</p>
+          </div>
+        </td>
+      </tr>
+      <tr style="background-color: #001649;">
+        <td style="padding: 30px;">
+          <p style="margin: 0; color: #fff; text-align: center;">Need help with your booking?</p>
+          <a href="javascript:void(0)"
+            style="color: #fff; text-align: center; display: block; text-decoration: underline;">We are here to help you</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

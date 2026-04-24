@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>FlexsiRent | Booking Confirmed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    table {
+      max-width: 600px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 10px;
+      border-collapse: collapse;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      background-color: #f5f5f5;
+      text-align: center;
+      padding: 15px;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .header img {
+      width: 120px;
+      margin: auto;
+    }
+
+    .content {
+      padding: 50px 30px;
+      text-align: center;
+    }
+
+    .content img {
+      width: 120px;
+      margin: 0 auto 20px;
+    }
+
+    .content h3 {
+      color: #001649;
+      margin-top: 10px;
+    }
+
+    .footer {
+      background-color: #001649;
+      color: #fff;
+      padding: 30px;
+      text-align: center;
+      border-radius: 0 0 10px 10px;
+    }
+
+    .footer a {
+      color: #fff;
+      text-decoration: underline;
+      display: inline-block;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <table>
+      <tr class="header">
+        <td>
+          <img src="http://3.75.55.216:4000/logo.png" alt="FlexsiRent Logo" />
+        </td>
+      </tr>
+      <tr>
+        <td class="content">
+          <img src="http://3.75.55.216:4000/success-chk.png" alt="Success" />
+          <h3>Payment Successful!</h3>
+          <p>Your booking has been confirmed successfully.<br />
+            We’ve sent you an email with the booking details.</p>
+          <div style="padding-top: 40px; text-align: left;">
+            <h4 style="margin-bottom: 10px;">Cheers,</h4>
+            <p style="margin-top: 0;">FlexsiRent Team</p>
+          </div>
+        </td>
+      </tr>
+      <tr class="footer">
+        <td>
+          <p style="margin: 0;">Need more help?</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>
