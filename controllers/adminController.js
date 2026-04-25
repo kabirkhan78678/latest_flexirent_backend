@@ -672,6 +672,7 @@ export const changePassword = async (req, res) => {
 export const addSubAdmin = async (req, res) => {
   try {
     let { permission, full_name, email, mobile } = req.body;
+    email = email?.trim()?.toLowerCase();
     const admin_id = req.user?.admin_id;
     const userDetails = await getDataByLabel(DB_TABLE.admin, "admin_id", admin_id);
 
@@ -990,6 +991,7 @@ export const updateListingProperty = async (req, res) => {
       available_from,
       min_stay_duration,
       status: 1,
+      list_type: 2,
       list_status: 1,
       max_person,
       cleaning_fee_type,

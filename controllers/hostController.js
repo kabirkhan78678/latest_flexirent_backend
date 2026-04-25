@@ -1091,6 +1091,10 @@ export const getAllMyPropetyListing = async (req, res) => {
 
     await Promise.all(
       property.map(async (item) => {
+        if (Number(item.list_status) === 1 && Number(item.list_type) === 1) {
+          item.list_type = 2;
+        }
+
         let image = await getDataByLabel(
           DB_TABLE.propertyImage,
           "property_id",

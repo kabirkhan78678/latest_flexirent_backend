@@ -667,17 +667,20 @@ export const addSubAdminSchema = [
     .notEmpty()
     .withMessage("The full_name field cannot be empty. Please provide a full_name."),
 
-  // body("email")
-  //   .notEmpty()
-  //   .withMessage("The email field cannot be empty. Please provide an email.")
-  //   .isEmail()
-  //   .withMessage("Please enter a valid email address.")
-  //   .normalizeEmail(),
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("The email field cannot be empty. Please provide an email.")
+    .isEmail()
+    .withMessage("Please enter a valid email address.")
+    .normalizeEmail(),
 
   body("mobile")
+    .trim()
     .notEmpty()
     .withMessage("The mobile field cannot be empty. Please provide a mobile.")
-    .isMobilePhone("any", { strictMode: true })
+    .customSanitizer((value) => String(value).replace(/[^\d+]/g, ""))
+    .isLength({ min: 6, max: 20 })
     .withMessage("Invalid phone number."),
 
   body("permission")
@@ -700,9 +703,11 @@ export const updateSubAdminSchema = [
 
 
   body("mobile")
+    .trim()
     .notEmpty()
     .withMessage("The mobile field cannot be empty. Please provide a mobile.")
-    .isMobilePhone("any", { strictMode: true })
+    .customSanitizer((value) => String(value).replace(/[^\d+]/g, ""))
+    .isLength({ min: 6, max: 20 })
     .withMessage("Invalid phone number."),
 
 
@@ -1207,9 +1212,11 @@ export const addSubHostSchema = [
 
 
   body("mobile")
+    .trim()
     .notEmpty()
     .withMessage("The mobile field cannot be empty. Please provide a mobile.")
-    .isMobilePhone("any", { strictMode: true })
+    .customSanitizer((value) => String(value).replace(/[^\d+]/g, ""))
+    .isLength({ min: 6, max: 20 })
     .withMessage("Invalid phone number."),
 
   body("permission")
@@ -1236,9 +1243,11 @@ export const updateSubhostSchema = [
 
 
   body("mobile")
+    .trim()
     .notEmpty()
     .withMessage("The mobile field cannot be empty. Please provide a mobile.")
-    .isMobilePhone("any", { strictMode: true })
+    .customSanitizer((value) => String(value).replace(/[^\d+]/g, ""))
+    .isLength({ min: 6, max: 20 })
     .withMessage("Invalid phone number."),
 
 
