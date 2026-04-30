@@ -1,6 +1,6 @@
 export const Message = {
   dbConnectionError: "Error when connecting to db:",
-  dbConnectionSuccess: "Connected to MySQL Server!",
+  dbConnectionSuccess: "Connected to PostgreSQL Server!",
   dbError: "Database connection error:",
   serverRunning: "Node app is running on the specified port",
   dbConnectionClosing: "Closing database connection",

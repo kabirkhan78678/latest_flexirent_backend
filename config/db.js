@@ -1,9 +1,11 @@
-import mysql from 'mysql2';
+import pg from 'pg';
 import dotenv from 'dotenv';
-import util from 'util';
+import { AsyncLocalStorage } from 'async_hooks';
 import { Message } from '../utils/Messages.js';
 
 dotenv.config();
+
+const { Pool } = pg;
 
 const dbConfig = {
     host: process.env.DB_HOST,
@@ -13,48 +15,168 @@ const dbConfig = {
     database: process.env.DB_NAME
 };
 
-let connection;
+const pool = new Pool(dbConfig);
+const transactionStorage = new AsyncLocalStorage();
 
-function handleDisconnect() {
-    connection = mysql.createConnection(dbConfig);
-    connection.connect((err) => {
-        if (err) {
-            console.log(Message.dbConnectionError, err);
-            setTimeout(handleDisconnect, 2000);
-        } else {
-            console.log(Message.dbConnectionSuccess);
-        };
-    });
-
-    connection.on('error', (err) => {
-        console.log(Message.dbError, err);
-        if (err.code === Message.protocolConnectionLost) {
-            handleDisconnect();
-        } else {
-            throw err;
-        };
-    });
+const normalizeSql = (sql) => {
+    return sql
+        .replace(/`([^`]+)`/g, '"$1"')
+        .replace(/\bTHEN\s+"([^"]*)"/g, "THEN '$1'")
+        .replace(/\bELSE\s+"([^"]*)"/g, "ELSE '$1'");
 };
 
-handleDisconnect();
+const convertPlaceholders = (sql, args = []) => {
+    let parameterIndex = 1;
+    let argIndex = 0;
+    let formattedSql = "";
+    const formattedArgs = [];
+    let inSingleQuote = false;
+    let inDoubleQuote = false;
+
+    for (let i = 0; i < sql.length; i += 1) {
+        const char = sql[i];
+        const prevChar = sql[i - 1];
+
+        if (char === "'" && prevChar !== "\\" && !inDoubleQuote) {
+            inSingleQuote = !inSingleQuote;
+            formattedSql += char;
+            continue;
+        }
+
+        if (char === '"' && prevChar !== "\\" && !inSingleQuote) {
+            inDoubleQuote = !inDoubleQuote;
+            formattedSql += char;
+            continue;
+        }
+
+        if (char === '?' && !inSingleQuote && !inDoubleQuote) {
+            const value = args[argIndex++];
+
+            if (Array.isArray(value)) {
+                if (value.length === 0) {
+                    formattedSql += "NULL";
+                } else {
+                    const placeholders = value.map(() => `$${parameterIndex++}`);
+                    formattedSql += placeholders.join(", ");
+                    formattedArgs.push(...value);
+                }
+            } else {
+                formattedSql += `$${parameterIndex++}`;
+                formattedArgs.push(value);
+            }
+            continue;
+        }
+
+        formattedSql += char;
+    }
+
+    return {
+        text: normalizeSql(formattedSql),
+        values: formattedArgs
+    };
+};
+
+const extractInsertId = (row = {}) => {
+    if (row.id !== undefined) return row.id;
+
+    const idKey = Object.keys(row).find((key) => key.endsWith('_id'));
+    return idKey ? row[idKey] : null;
+};
+
+const formatResult = (result) => {
+    const command = result.command?.toUpperCase();
+
+    if (command === 'SELECT') {
+        return result.rows;
+    }
+
+    const baseResult = {
+        affectedRows: result.rowCount || 0,
+        changedRows: result.rowCount || 0,
+        rows: result.rows || []
+    };
+
+    if (command === 'INSERT') {
+        return {
+            ...baseResult,
+            insertId: extractInsertId(result.rows?.[0]),
+        };
+    }
+
+    return baseResult;
+};
+
+async function verifyConnection() {
+    try {
+        const client = await pool.connect();
+        client.release();
+        console.log(Message.dbConnectionSuccess);
+    } catch (err) {
+        console.log(Message.dbConnectionError, err);
+    }
+}
+
+verifyConnection();
+
+pool.on('error', (err) => {
+    console.log(Message.dbError, err);
+});
+
+function getExecutor() {
+    return transactionStorage.getStore() || pool;
+}
+
+function withReturningForInsert(sql) {
+    if (!/^\s*insert\s+/i.test(sql) || /\breturning\b/i.test(sql)) {
+        return sql;
+    }
+
+    return `${sql.trim()} RETURNING *`;
+}
 
 function makeDb() {
     return {
-        async query(sql, args) {
-            return util.promisify(connection.query).call(connection, sql, args);
+        async query(sql, args = []) {
+            const executor = getExecutor();
+            const prepared = convertPlaceholders(withReturningForInsert(sql), args);
+            const result = await executor.query(prepared);
+            return formatResult(result);
         },
         async beginTransaction() {
-            return util.promisify(connection.beginTransaction).call(connection);
+            const client = await pool.connect();
+            try {
+                await client.query('BEGIN');
+                transactionStorage.enterWith(client);
+            } catch (error) {
+                client.release();
+                throw error;
+            }
         },
         async commit() {
-            return util.promisify(connection.commit).call(connection);
+            const client = transactionStorage.getStore();
+            if (!client) return;
+
+            try {
+                await client.query('COMMIT');
+            } finally {
+                client.release();
+                transactionStorage.enterWith(null);
+            }
         },
         async rollback() {
-            return util.promisify(connection.rollback).call(connection);
+            const client = transactionStorage.getStore();
+            if (!client) return;
+
+            try {
+                await client.query('ROLLBACK');
+            } finally {
+                client.release();
+                transactionStorage.enterWith(null);
+            }
         },
         async close() {
             console.log(Message.dbConnectionClosing);
-            return util.promisify(connection.end).call(connection);
+            return pool.end();
         }
     };
 }

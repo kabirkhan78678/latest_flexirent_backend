@@ -938,7 +938,7 @@ export const getCancellationPolicyByIdModel = async (policy_id) => {
   `;
 
   const result = await db.query(query, [policy_id]);
-  return result.rows[0];
+  return result[0];
 };
 
 
